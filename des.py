@@ -812,11 +812,19 @@ def install_ccls():
         print("Error on create directory")
         return False
 
-    cmd = 'git clone --depth=1 --recursive https://github.com/MaskRay/ccls ~/my_bin/ccls_install' 
+    cmd = 'git clone --recursive https://github.com/MaskRay/ccls ~/my_bin/ccls_install' 
     output=subprocess.call (cmd, shell=True)    
     if output!=0:
         print("Error on cloning")
         return False
+
+    # to remove build configuration error
+    cmd = 'cd ~/my_bin/ccls_install ; git reset --hard c5acf62060f32f79b4647fd63c05e6b1a9135e6f' 
+    output=subprocess.call (cmd, shell=True)    
+    if output!=0:
+        print("fail to set the specific commit")
+        return False
+
 
     cmd = 'cd ~/my_bin/ccls_install ; cmake -H. -BRelease -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/lib/llvm-8 && cmake --build Release' 
     output=subprocess.call (cmd, shell=True)    
