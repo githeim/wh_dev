@@ -1,4 +1,11 @@
 #!/bin/bash
+trap error_callback ERR 
+error_callback() {      
+  echo 'Error Occurs'   
+  exit 1                
+}                       
+
+sudo apt install -y nodejs && \
 sudo apt-get update  && \
 sudo apt-get install -y software-properties-common && \
 sudo add-apt-repository -y ppa:jonathonf/vim && \
@@ -11,6 +18,15 @@ sudo apt-get install curl build-essential cmake python-dev libncurses5-dev unzip
        && echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list \
        && sudo apt update && sudo apt install mono-devel -y && \
 curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - && \
-sudo apt install -y nodejs && \
-echo finfin
+sudo apt install -y nodejs 
 
+# google test installation
+sudo apt-get install libgtest-dev -y
+pushd /usr/src/gtest
+sudo cmake CMakeLists.txt
+sudo make -j$(nproc --all)
+sudo cp *.a /usr/lib
+sudo mkdir -p /usr/local/lib/gtest
+sudo ln -s /usr/lib/libgtest.a /usr/local/lib/gtest/libgtest.a
+sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
+popd
