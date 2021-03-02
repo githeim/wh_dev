@@ -24,7 +24,7 @@ sudo apt-get install libgtest-dev -y
 pushd /usr/src/gtest
 sudo cmake CMakeLists.txt
 sudo make -j$(nproc --all)
-sudo cp *.a /usr/lib
+sudo find . -name libgtest*.a -exec cp {} /usr/lib \;
 sudo mkdir -p /usr/local/lib/gtest
 sudo ln -s /usr/lib/libgtest.a /usr/local/lib/gtest/libgtest.a
 sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
