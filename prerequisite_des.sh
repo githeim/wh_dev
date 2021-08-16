@@ -16,7 +16,7 @@ sudo apt-get install curl build-essential cmake python-dev libncurses5-dev unzip
        && sudo apt install gnupg ca-certificates -y \
        && sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
        && sudo apt update && sudo apt install mono-devel -y && \
-curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - && \
+curl -sL https://deb.nodesource.com/setup_14.x | sudo bash - && \
 sudo apt install -y nodejs 
 
 # google test installation
