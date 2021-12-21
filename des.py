@@ -967,7 +967,7 @@ def add_scripts():
             return False
     return True
 
-g_STR_global_version_name ='global-6.6.3'
+g_STR_global_version_name ='global-6.6.8'
 g_STR_global_compressed_name=g_STR_global_version_name+".tar.gz" 
 g_STR_global_URL= 'https://ftp.gnu.org/pub/gnu/global/'+g_STR_global_version_name+'.tar.gz'
 
