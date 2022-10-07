@@ -678,7 +678,6 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 " Using CocList
 " Show all diagnostics
-nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
 " Manage extensions
 nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
 " Show commands
@@ -819,14 +818,14 @@ def install_ccls():
         return False
 
     # to remove build configuration error
-    cmd = 'cd ~/my_bin/ccls_install ; git reset --hard c5acf62060f32f79b4647fd63c05e6b1a9135e6f' 
+    cmd = 'cd ~/my_bin/ccls_install ; git reset --hard 74458915b3472b0df26264d7d1599505385cf453' 
     output=subprocess.call (cmd, shell=True)    
     if output!=0:
         print("fail to set the specific commit")
         return False
 
 
-    cmd = 'cd ~/my_bin/ccls_install ; cmake -H. -BRelease -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/lib/llvm-8 && cmake --build Release' 
+    cmd = 'cd ~/my_bin/ccls_install ; cmake -H. -BRelease -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/lib/llvm-14 && cmake --build Release -j24' 
     output=subprocess.call (cmd, shell=True)    
     if output!=0:
         print("Error on configuration & build")
