@@ -553,7 +553,7 @@ Plugin 'airblade/vim-gitgutter'
 " vimplug 설정     ===============================                               
 call plug#begin('~/.vim/plugged')                                                
 Plug 'terryma/vim-multiple-cursors'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}                                  
+Plug 'neoclide/coc.nvim', {'tag': 'v0.0.82'}                                  
 Plug 'OmniSharp/omnisharp-vim'
 call plug#end()                                                                  
 " vimplug 설정  end===============================    
@@ -586,11 +586,12 @@ set signcolumn=yes
 
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <silent><expr> <TAB>                                         
+      \ coc#pum#visible() ? coc#pum#next(1):                          
+      \ <SID>check_back_space() ? "\<Tab>" :                          
+      \ coc#refresh()                                                 
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>" 
+
 
 function! s:check_back_space() abort
   let col = col('.') - 1
