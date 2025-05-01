@@ -805,7 +805,7 @@ def install_plugins_vimplug():
     return True
 
 def install_ccls():
-    cmd = 'mkdir ~/my_bin/ccls_install' 
+    cmd = 'mkdir -p ~/my_bin/ccls_install' 
     output=subprocess.call (cmd, shell=True)    
     if output!=0:
         print("Error on create directory")
@@ -818,7 +818,7 @@ def install_ccls():
         return False
 
     # to remove build configuration error
-    cmd = 'cd ~/my_bin/ccls_install ; git reset --hard 74458915b3472b0df26264d7d1599505385cf453' 
+    cmd = 'cd ~/my_bin/ccls_install ; git reset --hard 962c0e' 
     output=subprocess.call (cmd, shell=True)    
     if output!=0:
         print("fail to set the specific commit")
