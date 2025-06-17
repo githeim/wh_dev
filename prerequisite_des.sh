@@ -1,9 +1,16 @@
 #!/bin/bash
-trap error_callback ERR 
-error_callback() {      
-  echo 'Error Occurs'   
-  exit 1                
-}                       
+error() {
+  local parent_lineno="$1"
+  local message="$2"
+  local code="${3:-1}"
+  if [[ -n "$message" ]] ; then
+    echo "Error on or near line ${parent_lineno}: ${message}; exiting with status ${code}"
+  else
+    echo "Error on or near line ${parent_lineno}; exiting with status ${code}"
+  fi
+  exit "${code}"
+}
+trap 'error ${LINENO}' ERR
 
 sudo apt-get update  && \
 sudo apt-get install -y software-properties-common && \
@@ -15,6 +22,21 @@ sudo apt-get install curl build-essential cmake python3-dev libncurses5-dev unzi
        && sudo apt install gnupg ca-certificates -y \
        && sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
        && sudo apt update && sudo apt install mono-devel -y
+sudo apt install -y ninja-build 
+
+# Install lsp server
+# c++ lsp : clangd install
+sudo apt-get install clangd-12 -y
+
+# python lsp 
+sudo apt-get install python3-pylsp -y
+
+# cmake lsp
+sudo apt install python3.10-venv -y
+pip3 install cmake-language-server
+
+# create LSP server download directory
+mkdir -p $HOME/.local/share/vim-lsp-settings/servers
 
 # google test installation
 sudo apt-get install libgtest-dev -y

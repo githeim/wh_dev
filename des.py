@@ -43,7 +43,7 @@ export GIT_EDITOR=vim
 export EDITOR=vim            
 
 # :x: for remote connection
-export DISPLAY=:1
+# export DISPLAY=:1
 
 # for docker
 alias docker='sudo docker'           
@@ -52,320 +52,9 @@ alias docker='sudo docker'
             """
 g_strBashrc_writemode ='a' # :x: add the script in the end of .bashrc file
 
-g_strCocSettings_filename=g_strHOME+'/.vim/coc-settings.json'
-g_strCocSettings_script = """
-{
-  "languageserver": {
-    "ccls": {
-      "command": "ccls",
-      "filetypes": ["c", "cpp", "objc", "objcpp"],
-      "rootPatterns": [".ccls", "compile_commands.json", ".vim/", ".git/", ".hg/"],
-      "initializationOptions": {
-        "cache": {
-          "directory": "/tmp/ccls"
-        }
-      }
-    },
-    "python": {
-      "command": "python",
-      "args": [
-        "-mpyls",
-        "-vv",
-        "--log-file",
-        "/tmp/lsp_python.log"
-      ],
-      "trace.server": "verbose",
-      "filetypes": [
-        "python"
-      ],
-      "settings": {
-        "pyls": {
-          "enable": true,
-          "trace": {
-            "server": "verbose"
-          },
-          "commandPath": "",
-          "configurationSources": [
-            "pycodestyle"
-          ],
-          "plugins": {
-            "jedi_completion": {
-              "enabled": true
-            },
-            "jedi_hover": {
-              "enabled": true
-            },
-            "jedi_references": {
-              "enabled": true
-            },
-            "jedi_signature_help": {
-              "enabled": true
-            },
-            "jedi_symbols": {
-              "enabled": true,
-              "all_scopes": true
-            },
-            "mccabe": {
-              "enabled": true,
-              "threshold": 15
-            },
-            "preload": {
-              "enabled": true
-            },
-            "pycodestyle": {
-              "enabled": true
-            },
-            "pydocstyle": {
-              "enabled": false,
-              "match": "(?!test_).*\\\\.py",
-              "matchDir": "[^\\\\.].*"
-            },
-            "pyflakes": {
-              "enabled": true
-            },
-            "rope_completion": {
-              "enabled": true
-            },
-            "yapf": {
-              "enabled": true
-            }
-          }
-        }
-      }
-    }
-  }
-}
-            """
-g_strCocSettings_writemode ='w' # :x: write new script 
-
-g_strCCLS_Setting_filename=g_strHOME+'/.ccls'
-g_strCCLS_Setting_script = """
-%c -std=c11
-%cpp -std=gnu++14
-%h -x
-%h c++-header
-
-# for QT support
--I/usr/include/x86_64-linux-gnu/qt5
--I/usr/include/x86_64-linux-gnu/qt5/QtCore
--I/usr/include/x86_64-linux-gnu/qt5/QtWidgets
-            """
-g_strCCLS_Setting_writemode ='w' # :x: add the script in the end of .bashrc file
-
-
-
-
-g_strMW_filename=g_strMYBIN+'/mw'
-g_strMW_script= """
-# _:x:_ Add Script for the dev. environment
-echo "Now MW_PATH is " $PWD
-awk -F= '{if ($1 ~/export MWPATH$/) {"echo $PWD"|getline curr_dir ;  print $1"=" curr_dir; }  else { print $0;}  }' ~/.bashrc > ~/.tmpoutput
-cp ~/.tmpoutput ~/.bashrc
-rm ~/.tmpoutput
-source ~/.bashrc
-echo "Make GTAGS"
-cd $MWPATH && gtags && cd -
-echo "Make GTAGS Done"
-
-"""
-g_strMW_writemode ='w' # :x: write new script for mw file
-
-g_strMdb_files_filename =g_strMYBIN+'/_mdb_files.sh'
-g_strMdb_files_script ="""
-#!/bin/sh
-find ${MWPATH}/ -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' -not -name '.svn' > ${MWPATH}/tmp_db_files.out
-mv ${MWPATH}/tmp_db_files.out ${MWPATH}/db_files.out
-"""
-g_strMdb_files_writemode='w'
-
-g_strMdb_main_ctags_filename =g_strMYBIN+'/_mdb_main_ctags.sh'
-g_strMdb_main_ctags_script ="""
-#!/bin/sh
-_TMP_DB_FILES_NAME=tmp_db_ctags_`date '+%0k_%0M_%0S_%0N'`.out
-_MY_CTAGS_PATH=~/my_bin
-ctags --fields=+l -f ${_MY_CTAGS_PATH}/${_TMP_DB_FILES_NAME}  -R /usr/include
-mv ${_MY_CTAGS_PATH}/${_TMP_DB_FILES_NAME} ${_MY_CTAGS_PATH}/local_main_tags
-"""
-g_strMdb_main_ctags_writemode='w'
-
-g_strMdb_ctags_filename =g_strMYBIN+'/_mdb_ctags.sh'
-g_strMdb_ctags_script ="""
-#!/bin/sh
-_TMP_DB_FILES_NAME=tmp_db_ctags_`date '+%0k_%0M_%0S_%0N'`.out
-ctags --fields=+l -L ${MWPATH}/db_files.out -f ${MWPATH}/${_TMP_DB_FILES_NAME} -b
-mv ${MWPATH}/${_TMP_DB_FILES_NAME} ${MWPATH}/tags
-"""
-g_strMdb_ctags_writemode='w'
-
-# YCM(YouCompleteMe) plugin용 configuration
-g_strYCM_conf_filename=g_strHOME+"/.vim/.ycm_extra_conf.py"
-g_strYCM_conf_script="""
-# Copyright (C) 2014 Google Inc.
-#
-# This file is part of ycmd.
-#
-# ycmd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# ycmd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
-
-import os
-import ycm_core
-
-# :x: my setting ###############
-def GetMWPATH():
-    addFlags=[]
-    for (path,dir,files) in os.walk(os.environ['MWPATH'],True,None,True):
-        if path.find('.git') == -1 :
-            addFlags= addFlags + ['-isystem']
-            addFlags= addFlags + [path]
-    return addFlags
-# :x: my setting end ###########
-
-
-
-# These are the compilation flags that will be used in case there's no
-# compilation database set (by default, one is not set).
-# CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
-flags = [
-'-Wall',
-'-Wextra',
-'-Werror',
-'-fexceptions',
-'-DNDEBUG',
-# THIS IS IMPORTANT! Without a "-std=<something>" flag, clang won't know which
-# language to use when compiling headers. So it will guess. Badly. So C++
-# headers will be compiled as C headers. You don't want that so ALWAYS specify
-# a "-std=<something>".
-# For a C project, you would set this to something like 'c99' instead of
-# 'c++11'.
-'-std=c++11',
-# ...and the same thing goes for the magic -x option which specifies the
-# language that the files to be compiled are written in. This is mostly
-# relevant for c++ headers.
-# For a C project, you would set this to 'c' instead of 'c++'.
-'-x',
-'c++',
-'-isystem',
-'/usr/include',
-'-isystem',
-'/usr/local/include',
-'-isystem',
-'/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/c++/v1',
-'-isystem',
-'/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include',
-
-# my setting ####
-'-isystem','/usr/include/SDL2',
-# my setting ####
-
-] + GetMWPATH() # :x: add path
-
-# Set this to the absolute path to the folder (NOT the file!) containing the
-# compile_commands.json file to use that instead of 'flags'. See here for
-# more details: http://clang.llvm.org/docs/JSONCompilationDatabase.html
-#
-# Most projects will NOT need to set this to anything; you can just change the
-# 'flags' list of compilation flags.
-compilation_database_folder = ''
-
-if os.path.exists( compilation_database_folder ):
-  database = ycm_core.CompilationDatabase( compilation_database_folder )
-else:
-  database = None
-
-SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.m', '.mm' ]
-
-def DirectoryOfThisScript():
-  return os.path.dirname( os.path.abspath( __file__ ) )
-
-
-def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
-  if not working_directory:
-    return list( flags )
-  new_flags = []
-  make_next_absolute = False
-  path_flags = [ '-isystem', '-I', '-iquote', '--sysroot=' ]
-  for flag in flags:
-    new_flag = flag
-
-    if make_next_absolute:
-      make_next_absolute = False
-      if not flag.startswith( '/' ):
-        new_flag = os.path.join( working_directory, flag )
-
-    for path_flag in path_flags:
-      if flag == path_flag:
-        make_next_absolute = True
-        break
-
-      if flag.startswith( path_flag ):
-        path = flag[ len( path_flag ): ]
-        new_flag = path_flag + os.path.join( working_directory, path )
-        break
-
-    if new_flag:
-      new_flags.append( new_flag )
-  return new_flags
-
-
-def IsHeaderFile( filename ):
-  extension = os.path.splitext( filename )[ 1 ]
-  return extension in [ '.h', '.hxx', '.hpp', '.hh' ]
-
-
-def GetCompilationInfoForFile( filename ):
-  # The compilation_commands.json file generated by CMake does not have entries
-  # for header files. So we do our best by asking the db for flags for a
-  # corresponding source file, if any. If one exists, the flags for that file
-  # should be good enough.
-  if IsHeaderFile( filename ):
-    basename = os.path.splitext( filename )[ 0 ]
-    for extension in SOURCE_EXTENSIONS:
-      replacement_file = basename + extension
-      if os.path.exists( replacement_file ):
-        compilation_info = database.GetCompilationInfoForFile(
-          replacement_file )
-        if compilation_info.compiler_flags_:
-          return compilation_info
-    return None
-  return database.GetCompilationInfoForFile( filename )
-
-
-# This is the entry point; this function is called by ycmd to produce flags for
-# a file.
-def FlagsForFile( filename, **kwargs ):
-  if database:
-    # Bear in mind that compilation_info.compiler_flags_ does NOT return a
-    # python list, but a "list-like" StringVec object
-    compilation_info = GetCompilationInfoForFile( filename )
-    if not compilation_info:
-      return None
-
-    final_flags = MakeRelativePathsInFlagsAbsolute(
-      compilation_info.compiler_flags_,
-      compilation_info.compiler_working_dir_ )
-  else:
-    relative_to = DirectoryOfThisScript()
-    final_flags = MakeRelativePathsInFlagsAbsolute( flags, relative_to )
-
-  return {
-    'flags': final_flags,
-    'do_cache': True
-  }
-"""
-g_strYCM_conf_writemode='w'
-
 g_strTMUX_conf_filename=g_strHOME+"/.tmux.conf"
 g_strTMUX_conf_script = """
+set -g default-terminal "screen-256color"
 # use vim keybindings in copy mode
 setw -g mode-keys vi
  
@@ -390,9 +79,6 @@ set fencs=usc-bom,utf-8,euc-kr,cp949
 set bs=2
 "syntax 설정
 syntax enable
-"ctags 설정
-set tags=$MWPATH/tags
-set tags+=~/my_bin/local_main_tags
 "tab 설정
 set tabstop=2
 set et
@@ -424,39 +110,16 @@ nmap [1 <Insert><Insert>Debug.Log(":x: chk ");<CR><C-C>
 nmap [2 <Insert><Insert>printf("\\033[1;33m[%s][%d] :x: chk \\033[m\\n",__FUNCTION__,__LINE__);<CR><C-C>
 nmap [3 <Insert><Insert>printf("\\033[1;36m[%s][%d] :x: chk \\033[m\\n",__FUNCTION__,__LINE__);<CR><C-C>
 nmap [4 a/* :x: projectname_myname<C-R>=strftime("%Y%m%d")<CR>_*/<C-C>
-nmap [5 :Gtags -r<SPACE><cword>
-nmap [6 <Insert><Insert>#if 0 // :x: for test<CR>#endif // :x: for test<CR><C-C>
- 
-"ctags/cscope관련 단축키
-nmap [7 :!~/my_bin/_mdb_files.sh &<CR><CR>
-nmap [8 :!~/my_bin/_mdb_ctags.sh &<CR><CR>
-nmap [0 :source ~/.vimrc<CR>:e!<CR>
-nmap [- :source ~/.vimrc<CR>:UpdateTypesFileOnly<CR>
-nmap [w :w<CR>:!~/my_bin/_mdb_ctags.sh &<CR><CR>
- 
-"gnu global 관련 단축키
-nmap <C-\><C-]> :GtagsCursor<CR>
-
 
 nmap <F2> :BufExplorer<CR>
-"map <F3> :TlistToggle<CR>
-"TagList보다 Tagbar가 좀 더 우수하다
 map <F3> :TagbarToggle<CR>
 map <F4> :NERDTreeToggle $PWD<CR>
-map <F7> :Gtags<SPACE>
 map <F8> :!bash<CR>
 
 nmap ;2 :BufExplorer<CR>
-"map  :TlistToggle<CR>
-"TagList보다 Tagbar가 좀 더 우수하다
 map ;3 :TagbarToggle<CR>
 map ;4 :NERDTreeToggle $PWD<CR>
-map ;5 :Gtags<SPACE>
 map ;6 :!bash<CR>
-
-
-"Vim grep 설정
-map <C-a> :noautocmd vimgrep <cword> `cat $MWPATH/db_files.out`
 
 
 
@@ -464,10 +127,6 @@ map <C-a> :noautocmd vimgrep <cword> `cat $MWPATH/db_files.out`
 "term 변경
 set term=xterm
 set t_Co=256
-" gnu global 자동 갱신 설정
-let Gtags_Auto_Update=1   
-let Gtags_No_Auto_Jump=1
-
 
 " vundle 설정 ===================================
 set nocompatible              " be iMproved, required
@@ -517,15 +176,8 @@ Plugin 'DoxygenToolkit.vim'
 Plugin 'The-NERD-tree'
 Plugin 'Tagbar'
 Plugin 'bufexplorer.zip'
-" Plugin 'Valloric/YouCompleteMe'
 " Airline 설치
 Plugin 'vim-airline/vim-airline'
-" Audo Tag 설치 ; ctag/cscope 갱신기능
-Plugin 'AutoTag'
-" ultisnips 설정 - engine  
-Plugin 'SirVer/ultisnips'  
-" ultisnips 설정 - engine  
-Plugin 'honza/vim-snippets'
 " cpp syntax 설정
 Plugin 'octol/vim-cpp-enhanced-highlight'
 
@@ -534,7 +186,6 @@ Plugin 'ctrlpvim/ctrlp.vim'
 
 " syntastic 설정
 Plugin 'scrooloose/syntastic'
-
 " vim fugitive
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
@@ -542,158 +193,84 @@ Plugin 'airblade/vim-gitgutter'
 
 " vundle 설정  end===============================
 
-" YCM 설정 ===========================
-"let g:ycm_global_ycm_extra_conf = "~/.vim/.ycm_extra_conf.py"
-"let g:ycm_key_list_select_completion=[]  
-"let g:ycm_key_list_previous_completion=[]
-"let g:ycm_autoclose_preview_window_after_completion=1
-"let g:ycm_show_diagnostics_ui = 0
-
 
 " vimplug 설정     ===============================                               
 call plug#begin('~/.vim/plugged')                                                
 Plug 'terryma/vim-multiple-cursors'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}                                  
-Plug 'OmniSharp/omnisharp-vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'mattn/vim-lsp-settings'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
 call plug#end()                                                                  
 " vimplug 설정  end===============================    
 
-" omnisharp 설정 =====
-let g:OmniSharp_server_stdio = 1
-let g:OmniSharp_server_use_mono = 1
-let g:OmniSharp_highlight_types = 2
-" ====================
+" vim-lsp 설정 ===================================
+if executable('clangd')
+    " pip install python-lsp-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'clangd',
+        \ 'cmd': {server_info->['clangd']},
+        \ })
+endif
 
-" coc 설정 ===========================
-" if hidden is not set, TextEdit might fail.
-set hidden
+if executable('pylsp')
+    " pip install python-lsp-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pylsp',
+        \ 'cmd': {server_info->['pylsp']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
 
-" Some servers have issues with backup files, see #649
-set nobackup
-set nowritebackup
+if executable('bash-language-server')
+    " pip install python-lsp-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'bash-language-server',
+        \ 'cmd': {server_info->['bash-language-server']},
+        \ })
+endif
 
-" Better display for messages
-set cmdheight=2
+if executable('cmake-language-server')
+    au User lsp_setup call lsp#register_server({
+      \ 'name': 'cmake',
+      \ 'cmd': {server_info->['cmake-language-server']},
+      \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'build/'))},
+      \ 'whitelist': ['cmake'],
+      \ 'initialization_options': {
+        \   'buildDirectory': 'build',
+      \ }
+      \})
+endif
+function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    setlocal signcolumn=yes
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+    nmap <buffer> gd <plug>(lsp-definition)
+    nmap <buffer> gs <plug>(lsp-document-symbol-search)
+    nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
+    nmap <buffer> gr <plug>(lsp-references)
+    nmap <buffer> gi <plug>(lsp-implementation)
+    nmap <buffer> gt <plug>(lsp-type-definition)
+    nmap <buffer> <leader>rn <plug>(lsp-rename)
+    nmap <buffer> [g <plug>(lsp-previous-diagnostic)
+    nmap <buffer> ]g <plug>(lsp-next-diagnostic)
+    nmap <buffer> K <plug>(lsp-hover)
+    " :x: avoid mapping duplication:  nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    " :x: avoid mapping duplication:  nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
 
-" You will have bad experience for diagnostic messages when it's default 4000.
-set updatetime=300
+    let g:lsp_format_sync_timeout = 1000
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
 
-" don't give |ins-completion-menu| messages.
-set shortmess+=c
-
-" always show signcolumns
-set signcolumn=yes
-
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
+    " refer to doc to add more commands
 endfunction
 
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
+augroup lsp_install
+    au!
+    " call s:on_lsp_buffer_enabled only for languages that has the server registered.
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
 
-" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-" Or use `complete_info` if your vim support it, like:
-" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
-
-" Use `[g` and `]g` to navigate diagnostics
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-
-" Remap keys for gotos
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-" Use K to show documentation in preview window
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-
-" Highlight symbol under cursor on CursorHold
-autocmd CursorHold * silent call CocActionAsync('highlight')
-
-" Remap for rename current word
-nmap <leader>rn <Plug>(coc-rename)
-
-" Remap for format selected region
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup end
-
-" Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
-
-" Remap for do codeAction of current line
-nmap <leader>ac  <Plug>(coc-codeaction)
-" Fix autofix problem of current line
-nmap <leader>qf  <Plug>(coc-fix-current)
-
-" Create mappings for function text object, requires document symbols feature of languageserver.
-xmap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap if <Plug>(coc-funcobj-i)
-omap af <Plug>(coc-funcobj-a)
-
-" Use <C-d> for select selections ranges, needs server support, like: coc-tsserver, coc-python
-"nmap <silent> <C-d> <Plug>(coc-range-select)
-"xmap <silent> <C-d> <Plug>(coc-range-select)
-
-" Use `:Format` to format current buffer
-command! -nargs=0 Format :call CocAction('format')
-
-" Use `:Fold` to fold current buffer
-command! -nargs=? Fold :call     CocAction('fold', <f-args>)
-
-" use `:OR` for organize import of current buffer
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
-
-" Add status line support, for integration with other plugin, checkout `:h coc-status`
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" Using CocList
-" Show all diagnostics
-" Manage extensions
-nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
-" Show commands
-nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
-" Find symbol of current document
-nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
-" Search workspace symbols
-nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
-" Do default action for next item.
-nnoremap <silent> <space>j  :<C-u>CocNext<CR>
-" Do default action for previous item.
-nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
-" Resume latest coc list
-nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
-
-" ====================================
+" vim-lsp 설정 end ===============================
 
 "highlight 색깔 변경
 hi Comment term=NONE ctermfg=white guifg=#80a0ff gui=bold
@@ -719,10 +296,6 @@ g_downloadtool='wget'
 g_package_list = [
      # info, url,filename
     ["cvim.zip	6.1.1	2014-04-21","http://www.vim.org/scripts/download_script.php?src_id=21803","cvim.zip"],
-#    ["nerdtree.zip   4.2.0   2011-12-28","http://www.vim.org/scripts/download_script.php?src_id=17123","nerdtree.zip" ],
-#    ["tagbar.vmb 2.6.1   2014-01-23","http://www.vim.org/scripts/download_script.php?src_id=21362","tagbar.vmb" ],
-#    ["bufexplorer-7.4.6.zip  7.4.6   2014-11-04","http://www.vim.org/scripts/download_script.php?src_id=22601","bufexplorer-7.4.6.zip" ],
-#    ["DoxygenToolkit.vim 0.2.13  2010-10-16","http://www.vim.org/scripts/download_script.php?src_id=14064","DoxygenToolkit.vim" ],
     ["taghighlight_r2.1.4.zip    2.1.4   2011-12-15","http://www.vim.org/scripts/download_script.php?src_id=17066","taghighlight_r2.1.4.zip"],
 ]
 
@@ -804,57 +377,7 @@ def install_plugins_vimplug():
     print("OK")
     return True
 
-def install_ccls():
-    cmd = 'mkdir -p ~/my_bin/ccls_install' 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print("Error on create directory")
-        return False
-
-    cmd = 'git clone --recursive https://github.com/MaskRay/ccls ~/my_bin/ccls_install' 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print("Error on cloning")
-        return False
-
-    # to remove build configuration error
-    cmd = 'cd ~/my_bin/ccls_install ; git reset --hard 962c0e' 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print("fail to set the specific commit")
-        return False
-
-
-    cmd = 'cd ~/my_bin/ccls_install ; cmake -H. -BRelease -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/lib/llvm-14 && cmake --build Release -j24' 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print("Error on configuration & build")
-        return False
-
-    cmd = 'ln -s ~/my_bin/ccls_install/Release/ccls ~/my_bin/ccls' 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print("Error on making symbolic link")
-        return False
-
-    print("OK")
-    return True
-
-
-def install_ycm():
-    cmd = """cd ~/.vim/bundle/YouCompleteMe ; ./install.py --clang-completer    """
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print("Error on installing")
-        print("check the following packages ; build-essential, cmake, python-dev ")
-        print("ex) sudo apt-get install build-essential cmake ")
-        print("    sudo apt-get install python-dev ")
-        return False
-    print("OK")
-    return True
-
-   
-  
+ 
 
 def download_packages():
     for item in g_package_list:
@@ -952,70 +475,12 @@ def add_scripts():
 
     scripts =[ #filename, script to write, write mode 'w'(write) 'a'(add)
                [g_strBASHRC_filename,g_strBashrc_script,g_strBashrc_writemode],
-               [g_strMW_filename,g_strMW_script,g_strMW_writemode],
-               [g_strMdb_files_filename,g_strMdb_files_script,g_strMdb_files_writemode],
-               [g_strMdb_ctags_filename,g_strMdb_ctags_script,g_strMdb_ctags_writemode],
-               [g_strMdb_main_ctags_filename,g_strMdb_main_ctags_script,g_strMdb_main_ctags_writemode],
                [g_strVIMRC_filename,g_strVIMRC_script,g_strVIMRC_writemode],
                [g_strTMUX_conf_filename,g_strTMUX_conf_script,g_strTMUX_conf_writemode],
-               [g_strCocSettings_filename,g_strCocSettings_script,g_strCocSettings_writemode],
-               [g_strCCLS_Setting_filename,g_strCCLS_Setting_script,g_strCCLS_Setting_writemode],
             ]
     for item in scripts:
         if add_script(item) != True:
             return False
-    return True
-
-g_STR_global_version_name ='global-6.6.8'
-g_STR_global_compressed_name=g_STR_global_version_name+".tar.gz" 
-g_STR_global_URL= 'https://ftp.gnu.org/pub/gnu/global/'+g_STR_global_version_name+'.tar.gz'
-
-def install_gnu_global():
-    print('install GNU global ; ',g_STR_global_compressed_name)
-    print('download the ',g_STR_global_compressed_name)
-
-    if os.path.isfile('.'+'/'+g_STR_global_compressed_name) == True:
-        print("Already it has the file ; "+g_strVIM_SETTING+'/'+g_STR_global_compressed_name)
-    else :
-        if download_file(g_STR_global_URL,g_STR_global_compressed_name,'.') == False :
-            print('download error!')
-            return False
-    print('extract ',g_STR_global_compressed_name)
-    cmd = 'tar xf ' +g_STR_global_compressed_name
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print('Error on extract file;',g_STR_global_compressed_name)
-        return False
-    print('build GNU global and install on ~/my_bin/global')
-
-
-
-    cmd = 'mkdir ~/my_bin/global ' 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print('Error on make directory ~/my_bin/global;')
-
-    cmd = 'cd '+ g_STR_global_version_name+' && ./configure --prefix=$HOME/my_bin/global && make && make install'
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print('Error on installation')
-        return False
-    print('copy vim plugin for gnu global')
-    cmd = 'cp ~/my_bin/global/share/gtags/gtags.vim ~/.vim/plugin'
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print('Error on extract file;',g_STR_global_compressed_name)
-        return False
-    
-    print('clean up gnu global files')
-    cmd = 'rm ' +g_STR_global_compressed_name+ ' && rm -rf '+g_STR_global_version_name 
-    output=subprocess.call (cmd, shell=True)    
-    if output!=0:
-        print('Error on cleanup files')
-        return False
-
-
-    print('GNU global installation done')
     return True
 
 
@@ -1023,7 +488,7 @@ def install_gnu_global():
 def main():
     nPhase =0
     print ("Development Environment setting is now start")
-    print ("2019.10.08 by windheim")
+    print ("2025.06.17 by windheim")
     print ("Before install, check the prerequisite packages")
     print ("Prerequisites ; ")
     print (g_strPrerequisites)
@@ -1081,30 +546,7 @@ def main():
     if install_plugins_vimplug() == False :
         print("Error on Phase #",nPhase)
         return False
-    ## ycm 설치
-    #nPhase+=1
-    #print ("Phase #",nPhase," ; install YCM(YouCompleteMe) plugin in vundle")
-    #install_ycm()
-    #if install_ycm() == False :
-    #    print("Error on Phase #",nPhase)
-    #    return False
-   
-    # gnu global 생성
-    nPhase+=1
-    print ("Phase #",nPhase," ; install GNU global manually")
-    if install_gnu_global() == False :
-        print("Error on Phase #",nPhase)
-        return False
 
-
-
-    # install ccls (c/c++ parser)
-    nPhase+=1
-    print ("Phase #",nPhase," ; install ccls the c/c++ parser")
-    if install_ccls() == False :
-        print("Error on Phase #",nPhase)
-        return False
-   
     return True
 
     
