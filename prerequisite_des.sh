@@ -26,7 +26,7 @@ sudo apt install -y ninja-build
 
 # Install lsp server
 # c++ lsp : clangd install
-sudo apt-get install clangd-12 -y
+sudo apt-get install clangd -y
 
 # python lsp 
 sudo apt-get install python3-pylsp -y
