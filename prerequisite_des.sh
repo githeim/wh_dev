@@ -33,7 +33,6 @@ sudo apt-get install python3-pylsp -y
 
 # cmake lsp
 sudo apt install python3-venv -y
-pip3 install cmake-language-server
 pip install --break-system-packages cmake-language-server
 
 # create LSP server download directory
