@@ -26,14 +26,15 @@ sudo apt install -y ninja-build
 
 # Install lsp server
 # c++ lsp : clangd install
-sudo apt-get install clangd-12 -y
+sudo apt-get install clangd -y
 
 # python lsp 
 sudo apt-get install python3-pylsp -y
 
 # cmake lsp
-sudo apt install python3.10-venv -y
+sudo apt install python3-venv -y
 pip3 install cmake-language-server
+pip install --break-system-packages cmake-language-server
 
 # create LSP server download directory
 mkdir -p $HOME/.local/share/vim-lsp-settings/servers
