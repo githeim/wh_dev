@@ -184,8 +184,6 @@ Plugin 'octol/vim-cpp-enhanced-highlight'
 " ctrlp 설정
 Plugin 'ctrlpvim/ctrlp.vim'
 
-" syntastic 설정
-Plugin 'scrooloose/syntastic'
 " vim fugitive
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
