@@ -205,14 +205,6 @@ call plug#end()
 " vimplug 설정  end===============================    
 
 " vim-lsp 설정 ===================================
-if executable('clangd')
-    " pip install python-lsp-server
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'clangd',
-        \ 'cmd': {server_info->['clangd']},
-        \ })
-endif
-
 if executable('pylsp')
     " pip install python-lsp-server
     au User lsp_setup call lsp#register_server({
