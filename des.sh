@@ -269,7 +269,7 @@ set shiftwidth=2
 set expandtab
 set smartindent
 set hlsearch
-set incsearch
+set noincsearch
 set ignorecase
 set smartcase
 set backspace=indent,eol,start
