@@ -282,6 +282,8 @@ set scrolloff=5
 set t_Co=256
 set background=dark
 set term=xterm
+" 상대괄호 표시 제거      
+let g:loaded_matchparen = 1 
 
 syntax on
 filetype plugin indent on
@@ -549,10 +551,10 @@ setw -g mode-keys vi
 set -g history-limit 100000
 
 # 창 번호 1부터 시작
-set -g base-index 1
+set -g base-index 0 
 
 # 마우스 활성화
-set -g mouse on
+set -g mouse off
 
 # 상태바 갱신 주기 (초)
 set -g status-interval 5
