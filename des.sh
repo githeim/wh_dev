@@ -476,7 +476,7 @@ nmap ;3   :Vista!!<CR>
 " ── fzf ─────────────────────────────────────────────────────
 nmap <Leader>p :Files<CR>
 nmap <Leader>b :Buffers<CR>
-nmap <Leader>/ :Rg<CR>
+nmap <Leader>/ :Rg <C-R><C-W><CR>
 " F2 / ;2 : 버퍼 목록 (BufExplorer 대체)
 nmap <F2> :Buffers<CR>
 nmap ;2   :Buffers<CR>
