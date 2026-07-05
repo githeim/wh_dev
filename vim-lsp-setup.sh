@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # =============================================================================
-# des.sh
-# 개발환경 자동 설치 스크립트
+# vim-lsp-setup.sh
+# Vim LSP 개발환경 자동 설치 스크립트
 #
 # 지원 언어 : C, C++, Python3, Rust, Bash
 # 주요 기능 : caller/callee 추적, go-to-definition, references, 자동완성
 # 지원 OS   : Ubuntu 22.04 (Jammy), Ubuntu 24.04 (Noble)
 #
-# 사용법    : bash des.sh
+# 사용법    : bash vim-lsp-setup.sh
 # =============================================================================
 
 set -euo pipefail
 
 # ─── 전역 상수 ────────────────────────────────────────────────────────────────
-readonly LOG_PREFIX="[des]"
+readonly LOG_PREFIX="[vim-lsp-setup]"
 readonly VIMRC="$HOME/.vimrc"
 readonly PLUG_PATH="$HOME/.vim/autoload/plug.vim"
 readonly SUPPORTED_OS=("jammy" "noble")
@@ -111,6 +111,7 @@ install_common_packages() {
         python3 \
         python3-pip \
         python3-venv \
+        ripgrep \
         ninja-build
     log_info "공통 패키지 설치 완료"
 }
@@ -264,12 +265,13 @@ generate_vimrc() {
 " ── 기본 설정 ───────────────────────────────────────────────
 set nocompatible
 set number
+set noincsearch
 set tabstop=2
 set shiftwidth=2
 set expandtab
 set smartindent
 set hlsearch
-set noincsearch
+set incsearch
 set ignorecase
 set smartcase
 set backspace=indent,eol,start
@@ -282,8 +284,6 @@ set scrolloff=5
 set t_Co=256
 set background=dark
 set term=xterm
-" 상대괄호 표시 제거      
-let g:loaded_matchparen = 1 
 
 syntax on
 filetype plugin indent on
@@ -334,6 +334,11 @@ let g:lsp_document_highlight_enabled = 1  " 같은 심볼 하이라이트
 let g:lsp_inlay_hints_enabled        = 0  " 인라인 파라미터 힌트 비활성화
 let g:lsp_call_hierarchy_enabled     = 1  " call hierarchy 활성화
 let g:lsp_format_sync_timeout        = 1000
+
+" grep 설정
+set grepprg=rg\ --vimgrep\ --no-heading\ --hidden\ --smart-case\ --glob\ '!.git' 
+set grepformat=%f:%l:%c:%m  
+nnoremap <leader>g :silent grep <C-R><C-W> */ \| copen<CR>
 
 " ── 자동완성 옵션 ───────────────────────────────────────────
 set completeopt=menuone,noinsert,noselect
@@ -478,7 +483,7 @@ nmap ;3   :Vista!!<CR>
 " ── fzf ─────────────────────────────────────────────────────
 nmap <Leader>p :Files<CR>
 nmap <Leader>b :Buffers<CR>
-nmap <Leader>/ :Rg <C-R><C-W><CR>
+nmap <Leader>/ :Rg<CR>
 " F2 / ;2 : 버퍼 목록 (BufExplorer 대체)
 nmap <F2> :Buffers<CR>
 nmap ;2   :Buffers<CR>
@@ -551,7 +556,7 @@ setw -g mode-keys vi
 set -g history-limit 100000
 
 # 창 번호 1부터 시작
-set -g base-index 0 
+set -g base-index 1
 
 # 마우스 활성화
 set -g mouse off
