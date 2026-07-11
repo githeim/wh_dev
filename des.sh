@@ -493,8 +493,8 @@ nnoremap <C-k> <C-w>k
 nmap <Tab>   :bnext<CR>
 nmap <S-Tab> :bprev<CR>
 
-" ── 검색 하이라이트 끄기 ────────────────────────────────────
-nmap <Leader><Space> :nohl<CR>
+" ── 검색 하이라이트 끄기 LSP 업데이트 ───────────────────────
+nmap <Leader><Space> :nohl<CR> :LspStopServer<CR> :sleep 200m <CR>:e<CR>
 
 " ── C/C++ 디버그 출력 스니펫 ────────────────────────────────
 nmap [2 <Insert>printf("\033[1;33m[%s][%d] :chk: \033[m\n",__FUNCTION__,__LINE__);<CR><C-C>
