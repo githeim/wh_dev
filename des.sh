@@ -5,7 +5,7 @@
 #
 # 지원 언어 : C, C++, Python3, Rust, Bash
 # 주요 기능 : caller/callee 추적, go-to-definition, references, 자동완성
-# 지원 OS   : Ubuntu 22.04 (Jammy), Ubuntu 24.04 (Noble)
+# 지원 OS   : Ubuntu 22.04 (Jammy), Ubuntu 24.04 (Noble), Ubuntu 26.04 (Resolute)
 #
 # 사용법    : bash des.sh
 # =============================================================================
@@ -16,7 +16,7 @@ set -euo pipefail
 readonly LOG_PREFIX="[des]"
 readonly VIMRC="$HOME/.vimrc"
 readonly PLUG_PATH="$HOME/.vim/autoload/plug.vim"
-readonly SUPPORTED_OS=("jammy" "noble")
+readonly SUPPORTED_OS=("jammy" "noble" "resolute")
 
 # ─── 공통 유틸 ────────────────────────────────────────────────────────────────
 
@@ -86,7 +86,7 @@ verify_os_support() {
     done
 
     if [ "$supported" = false ]; then
-        log_error "지원하지 않는 Ubuntu 버전: $OS_VERSION ($OS_CODENAME) / 지원 버전: 22.04, 24.04"
+        log_error "지원하지 않는 Ubuntu 버전: $OS_VERSION ($OS_CODENAME) / 지원 버전: 22.04, 24.04, 26.04"
     fi
 
     log_info "OS 검증 통과: Ubuntu $OS_VERSION ($OS_CODENAME)"
@@ -171,10 +171,35 @@ dispatch_os_packages() {
             # ── Ubuntu 24.04 분기 ─────────────────────────────
             install_system_packages_noble
             ;;
+        resolute)
+            # ── Ubuntu 26.04 분기 ─────────────────────────────
+            install_system_packages_resolute
+            ;;
         *)
             log_error "dispatch_os_packages: 알 수 없는 코드네임 $OS_CODENAME"
             ;;
     esac
+}
+
+# @brief Ubuntu 26.04 (Resolute) 전용 패키지 설치
+# @note  clangd 메타패키지, Ubuntu 저장소 Node.js 22.x 사용
+#        rust-analyzer는 Ubuntu 26.04 저장소에 없으므로 rustup으로 설치
+install_system_packages_resolute() {
+    log_info "[26.04 Resolute] clangd 설치..."
+    sudo apt-get install -y clangd
+
+    log_info "[26.04 Resolute] Ubuntu 저장소 Node.js 설치..."
+    # Ubuntu 26.04의 nodejs 후보는 22.x이므로 외부 NodeSource 저장소를 사용하지 않음.
+    sudo apt-get install -y nodejs npm
+
+    log_info "[26.04 Resolute] Rust 및 rust-analyzer 설치..."
+    sudo apt-get install -y rustup
+    # rustup은 toolchain이 없어도 rustc 프록시를 제공할 수 있으므로
+    # command -v가 아니라 활성 toolchain을 기준으로 초기화한다.
+    if ! rustup show active-toolchain 2>/dev/null | grep -q .; then
+        rustup default stable
+    fi
+    rustup component add rust-src rust-analyzer
 }
 
 # ─── Language Server 설치 ────────────────────────────────────────────────────
@@ -188,9 +213,9 @@ install_pylsp() {
             # ── Ubuntu 22.04 분기 ─────────────────────────────
             pip3 install --user --quiet python-lsp-server 2>/dev/null || true
             ;;
-        noble)
-            # ── Ubuntu 24.04 분기 ─────────────────────────────
-            # PEP 668 적용으로 apt 우선, 없으면 --break-system-packages
+        noble|resolute)
+            # ── Ubuntu 24.04/26.04 분기 ────────────────────────
+            # PEP 668 적용으로 apt 우선, 없으면 사용자 설치를 시도한다.
             sudo apt-get install -y python3-pylsp 2>/dev/null \
                 || pip3 install --user --break-system-packages --quiet \
                        python-lsp-server 2>/dev/null \
