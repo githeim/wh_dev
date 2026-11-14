@@ -120,9 +120,11 @@ install_common_packages() {
     log_info "공통 패키지 설치 완료"
 }
 
-# ─── Neovim 최신 버전 설치 및 vi/vim 연동 ─────────────────────────────────────
+# ─── Neovim 최신 버전 설치 ────────────────────────────────────────────────────
 
-# @brief GitHub 공식 최신 릴리즈에서 Neovim 바이너리를 설치하고 vi/vim/editor에 연결
+# @brief GitHub 공식 최신 릴리즈에서 Neovim 바이너리를 설치
+# @note  기본값으로 vi/vim/editor 시스템 대체를 Neovim으로 변경하며,
+#        DES_NVIM_SET_SYSTEM_ALTERNATIVES=0이면 변경하지 않음
 # @note  x86_64 및 arm64(aarch64) 아키텍처 자동 감지, Ubuntu 22.04~26.04 호환
 install_neovim_latest() {
     local arch
@@ -143,26 +145,58 @@ install_neovim_latest() {
     curl -fLo "$tmp_tar" "$url"
 
     log_info "/opt 에 Neovim 압축 해제 및 설치 중..."
-    sudo rm -rf "$install_dir" /opt/nvim
+    sudo rm -rf "$install_dir"
     sudo tar -C /opt -xzf "$tmp_tar"
     rm -f "$tmp_tar"
+
+    if [ -e /opt/nvim ] && [ ! -L /opt/nvim ]; then
+        log_error "/opt/nvim 이 심볼릭 링크가 아닙니다. 기존 디렉터리를 삭제하지 않고 중단합니다."
+    fi
     sudo ln -sfn "$install_dir" /opt/nvim
     sudo ln -sfn /opt/nvim/bin/nvim /usr/local/bin/nvim
 
-    log_info "vi / vim / editor 명령어를 Neovim으로 연결 중 (update-alternatives)..."
-    sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/nvim 110
-    sudo update-alternatives --set vi /usr/local/bin/nvim
-    sudo update-alternatives --install /usr/bin/vim vim /usr/local/bin/nvim 110
-    sudo update-alternatives --set vim /usr/local/bin/nvim
-    sudo update-alternatives --install /usr/bin/editor editor /usr/local/bin/nvim 110
-    sudo update-alternatives --set editor /usr/local/bin/nvim
+    if [ "${DES_NVIM_SET_SYSTEM_ALTERNATIVES:-1}" != "0" ]; then
+        log_info "vi / vim / editor 명령어를 Neovim으로 연결 중 (기본 적용, 비활성화: DES_NVIM_SET_SYSTEM_ALTERNATIVES=0)..."
+        sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/nvim 110
+        sudo update-alternatives --set vi /usr/local/bin/nvim
+        sudo update-alternatives --install /usr/bin/vim vim /usr/local/bin/nvim 110
+        sudo update-alternatives --set vim /usr/local/bin/nvim
+        sudo update-alternatives --install /usr/bin/editor editor /usr/local/bin/nvim 110
+        sudo update-alternatives --set editor /usr/local/bin/nvim
+    else
+        log_info "vi/vim/editor 시스템 대체를 변경하지 않습니다 (DES_NVIM_SET_SYSTEM_ALTERNATIVES=0)."
+    fi
 
     local nvim_ver
     nvim_ver="$(/usr/local/bin/nvim --version | head -n 1)"
-    log_info "Neovim 설치 및 vi/vim 연동 완료: $nvim_ver"
+    log_info "Neovim 설치 완료: $nvim_ver"
 }
 
 # ─── OS별 전용 패키지 ─────────────────────────────────────────────────────────
+
+# @brief rustup으로 rust-analyzer를 설치하고 실행 가능 여부를 검증
+install_rust_analyzer() {
+    if command -v rust-analyzer &>/dev/null; then
+        log_info "rust-analyzer 이미 설치됨: $(command -v rust-analyzer)"
+        return
+    fi
+
+    log_info "rust-analyzer 설치를 위해 rustup 준비 중..."
+    if ! command -v rustup &>/dev/null; then
+        sudo apt-get install -y rustup
+    fi
+
+    export PATH="$HOME/.cargo/bin:$PATH"
+    command -v rustup &>/dev/null || log_error "rustup 실행 파일을 찾을 수 없습니다"
+
+    if ! rustup show active-toolchain 2>/dev/null | grep -q .; then
+        rustup default stable
+    fi
+    rustup component add rust-src rust-analyzer
+
+    command -v rust-analyzer &>/dev/null || log_error "rust-analyzer 설치 뒤 실행 파일을 찾을 수 없습니다"
+    log_info "rust-analyzer 설치 완료: $(command -v rust-analyzer)"
+}
 
 # @brief Ubuntu 22.04 (Jammy) 전용 패키지 설치
 # @note  clangd-15, nodejs 18.x 사용
@@ -176,14 +210,7 @@ install_system_packages_jammy() {
     curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
     sudo apt-get install -y nodejs
 
-    log_info "[22.04 Jammy] rust-analyzer 설치..."
-    if command -v rustup &>/dev/null; then
-        rustup component add rust-analyzer 2>/dev/null \
-            && log_info "rustup으로 rust-analyzer 설치 완료" \
-            || log_warn "rustup rust-analyzer 설치 실패, apt 시도"
-    fi
-    sudo apt-get install -y rust-analyzer 2>/dev/null \
-        || log_warn "rust-analyzer apt 설치 실패 (rustup 사용 중이라면 무시)"
+    install_rust_analyzer
 }
 
 # @brief Ubuntu 24.04 (Noble) 전용 패키지 설치
@@ -196,14 +223,7 @@ install_system_packages_noble() {
     curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
     sudo apt-get install -y nodejs
 
-    log_info "[24.04 Noble] rust-analyzer 설치..."
-    if command -v rustup &>/dev/null; then
-        rustup component add rust-analyzer 2>/dev/null \
-            && log_info "rustup으로 rust-analyzer 설치 완료" \
-            || log_warn "rustup rust-analyzer 설치 실패, apt 시도"
-    fi
-    sudo apt-get install -y rust-analyzer 2>/dev/null \
-        || log_warn "rust-analyzer apt 설치 실패 (rustup 사용 중이라면 무시)"
+    install_rust_analyzer
 }
 
 # @brief Ubuntu 26.04 (Resolute) 전용 패키지 설치
@@ -216,12 +236,7 @@ install_system_packages_resolute() {
     log_info "[26.04 Resolute] Ubuntu 저장소 Node.js 설치..."
     sudo apt-get install -y nodejs npm
 
-    log_info "[26.04 Resolute] Rust 및 rust-analyzer 설치..."
-    sudo apt-get install -y rustup
-    if ! rustup show active-toolchain 2>/dev/null | grep -q .; then
-        rustup default stable
-    fi
-    rustup component add rust-src rust-analyzer
+    install_rust_analyzer
 }
 
 # @brief OS 코드네임에 따라 전용 패키지 설치 함수로 분기
@@ -249,18 +264,18 @@ dispatch_os_packages() {
 # @note  22.04는 pip 직접 설치, 24.04/26.04는 apt 우선 후 pip fallback
 install_pylsp() {
     log_info "pylsp (Python LSP) 설치 중..."
+    export PATH="$HOME/.local/bin:$PATH"
     case "$OS_CODENAME" in
         jammy)
-            pip3 install --user --quiet python-lsp-server 2>/dev/null || true
+            pip3 install --user --quiet python-lsp-server
             ;;
         noble|resolute)
-            sudo apt-get install -y python3-pylsp 2>/dev/null \
-                || pip3 install --user --break-system-packages --quiet \
-                       python-lsp-server 2>/dev/null \
-                || true
+            sudo apt-get install -y python3-pylsp \
+                || pip3 install --user --break-system-packages --quiet python-lsp-server
             ;;
     esac
-    log_info "pylsp 설치 완료"
+    command -v pylsp &>/dev/null || log_error "pylsp 설치 뒤 실행 파일을 찾을 수 없습니다"
+    log_info "pylsp 설치 완료: $(command -v pylsp)"
 }
 
 # @brief bash-language-server 설치 (npm 글로벌)
@@ -297,7 +312,12 @@ backup_init_lua() {
 # @note  Neovim 0.11+ 순정 내장 LSP(vim.lsp.config/enable) + 내장 Tree-sitter 사용
 #        최소 필수 플러그인(lazy.nvim): fzf-lua, aerial.nvim, nvim-tree.lua, DoxygenToolkit, gitsigns
 generate_init_lua() {
-    mkdir -p "$NVIM_CONFIG_DIR"
+    if [ -e "$NVIM_CONFIG_DIR" ] && [ ! -d "$NVIM_CONFIG_DIR" ]; then
+        log_error "Neovim 설정 경로가 디렉터리가 아닙니다: $NVIM_CONFIG_DIR"
+    fi
+
+    # 상위 ~/.config가 root 소유여도 nvim 전용 경로만 현재 사용자 소유로 생성한다.
+    sudo install -d -o "$(id -u)" -g "$(id -g)" -m 0755 "$NVIM_CONFIG_DIR"
     backup_init_lua
     log_info "init.lua 생성 중..."
 
@@ -336,9 +356,11 @@ opt.signcolumn     = "yes"
 opt.encoding       = "utf-8"
 opt.colorcolumn    = "81"
 opt.scrolloff      = 5
-opt.termguicolors  = false
+opt.termguicolors  = true
 opt.background     = "dark"
 opt.completeopt    = { "menuone", "noinsert", "noselect" }
+-- 마우스 입력 비활성화: 키보드 기반 조작만 사용
+opt.mouse          = ""
 
 -- Python 포함 모든 파일 2칸 들여쓰기 강제 (기본 ftplugin 덮어쓰기 방지)
 vim.g.python_recommended_style = 0
@@ -443,8 +465,14 @@ require("lazy").setup({
   rocks = { enabled = false },
 })
 
--- ── 내장 LSP 전역 옵션 (진단 및 인레이 힌트 기본 비활성화) ──
-vim.diagnostic.enable(false)
+-- ── 내장 LSP 전역 옵션 (진단 활성화, 인레이 힌트 비활성화) ──
+vim.diagnostic.enable(true)
+vim.diagnostic.config({
+  virtual_text = false,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+})
 if vim.lsp.inlay_hint then
   vim.lsp.inlay_hint.enable(false)
 end
@@ -618,10 +646,10 @@ local function open_left_top_term()
   local buf = vim.fn.bufnr("%")
   local half = math.floor(vim.fn.winheight(0) / 2)
   vim.cmd(half .. "split")
-  vim.cmd("leftabove vertical resize 100 | terminal")
-  vim.cmd("wincmd j")
+  vim.cmd("leftabove vertical terminal ++cols=100")
+  vim.cmd("wincmd l")
   vim.cmd("buffer " .. buf)
-  vim.cmd("wincmd k")
+  vim.cmd("wincmd h")
 end
 vim.keymap.set("n", "<F6>", open_left_top_term, { silent = true })
 vim.keymap.set("n", ";6",   open_left_top_term, { silent = true })
@@ -679,7 +707,15 @@ backup_tmux_conf() {
 }
 
 # @brief .tmux.conf 파일 생성
+# @note  기존 설정은 DES_NVIM_OVERWRITE_TMUX_CONF=1일 때만 백업 후 교체
 generate_tmux_conf() {
+    local tmux_conf="$HOME/.tmux.conf"
+    if [ -f "$tmux_conf" ] && [ "${DES_NVIM_OVERWRITE_TMUX_CONF:-0}" != "1" ]; then
+        log_info "기존 .tmux.conf를 유지합니다: $tmux_conf"
+        log_info "스크립트 기본 Truecolor 설정으로 교체하려면 DES_NVIM_OVERWRITE_TMUX_CONF=1 로 실행하세요."
+        return
+    fi
+
     backup_tmux_conf
     log_info ".tmux.conf 생성 중..."
 
@@ -688,8 +724,13 @@ generate_tmux_conf() {
 #  .tmux.conf
 # ============================================================
 
-# 256color 터미널
-set -g default-terminal "screen-256color"
+# Truecolor(RGB) 터미널
+set -g default-terminal "tmux-256color"
+set -as terminal-features ",xterm-256color:RGB"
+set -as terminal-overrides ",*:Tc"
+
+# 시스템 클립보드 연동
+set -g set-clipboard on
 
 # vi 키바인딩 (copy mode)
 setw -g mode-keys vi
@@ -697,8 +738,8 @@ setw -g mode-keys vi
 # 스크롤백 버퍼 100000줄
 set -g history-limit 100000
 
-# 창 번호 0부터 시작
-set -g base-index 0 
+# 창 번호 1부터 시작
+set -g base-index 1
 
 # 마우스 비활성화
 set -g mouse off
@@ -741,10 +782,20 @@ backup_gitconfig() {
 }
 
 # @brief ~/.gitconfig 틀 생성
+# @note  기존 Git identity가 있으면 덮어쓰지 않아 커밋 identity를 보존
 # @note  editor를 nvim(또는 연동된 vim)으로 설정
 generate_gitconfig() {
-    backup_gitconfig
-    log_info ".gitconfig 생성 중..."
+    local gitconfig="$HOME/.gitconfig"
+    if [ -f "$gitconfig" ]; then
+        if git config --global --get user.name >/dev/null 2>&1 \
+           || git config --global --get user.email >/dev/null 2>&1; then
+            log_info "기존 Git identity가 있어 .gitconfig 생성을 건너뜁니다: $gitconfig"
+            return
+        fi
+        backup_gitconfig
+    fi
+
+    log_info ".gitconfig 틀 생성 중..."
 
     cat > "$HOME/.gitconfig" << 'GITCONFIG_EOF'
 # ============================================================
@@ -790,7 +841,7 @@ print_usage_summary() {
     echo "║              Neovim 설치 완료                    ║"
     echo "╚══════════════════════════════════════════════════╝"
     echo ""
-    echo "실행 명령어 : vi, vim, nvim (모두 최신 Neovim으로 실행됨)"
+    echo "실행 명령어 : nvim (기본적으로 vi/vim/editor도 Neovim으로 연결, 비활성화: DES_NVIM_SET_SYSTEM_ALTERNATIVES=0)"
     echo "Leader 키   : Space"
     echo ""
     echo "── 이동 (내장 vim.lsp) ─────────────────────────────"
@@ -869,7 +920,7 @@ main() {
     print_phase 2 "공통 시스템 패키지 설치"
     install_common_packages
 
-    print_phase 3 "Neovim 최신 버전 설치 및 vi/vim 연동"
+    print_phase 3 "Neovim 최신 버전 설치"
     install_neovim_latest
 
     print_phase 4 "OS별 전용 패키지 설치 [OS: $OS_CODENAME]"
